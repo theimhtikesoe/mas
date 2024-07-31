@@ -29,12 +29,19 @@ jobs:
 
           echo "DRY_RUN=false" >>$GITHUB_ENV
           echo "MAS_VERSION=${{ github.event.release.tag_name }}" >>${GITHUB_ENV}
+          echo "RELEASE_BRANCH=releases/release-${{ github.event.release.tag_name }}" >>${GITHUB_ENV}
           echo "RELEASE_COMMIT=${{ github.event.release.target_commitish }}" >>${GITHUB_ENV}
 
       - name: 🔈 Log environment variables
+        env:
+          DRY_RUN: ${{ env.DRY_RUN }}
+          MAS_VERSION: ${{ env.MAS_VERSION }}
+          RELEASE_BRANCH: ${{ env.RELEASE_BRANCH }}
+          RELEASE_COMMIT: ${{ env.RELEASE_COMMIT }}
         run: |
           echo "DRY_RUN: ${DRY_RUN}"
           echo "MAS_VERSION: ${MAS_VERSION}"
+          echo "RELEASE_BRANCH: ${RELEASE_BRANCH}"
           echo "RELEASE_COMMIT: ${RELEASE_COMMIT}"
 
   prepare-release:
@@ -47,17 +54,22 @@ jobs:
           fetch-depth: 0
 
       - name: 🔀 Create release branch
+        env:
+          RELEASE_BRANCH: ${{ env.RELEASE_BRANCH }}
         run: |
-          branch_name="releases/release-${MAS_VERSION}"
-          echo "RELEASE_BRANCH=${branch_name}" >>${GITHUB_ENV}
-          git branch "${branch_name}"
-          git switch "${branch_name}"
+          git branch "${RELEASE_BRANCH}"
+          git switch "${RELEASE_BRANCH}"
 
       - name: 🔖 Update version
+        env:
+          MAS_VERSION: ${{ env.MAS_VERSION }}
+          RELEASE_COMMIT: ${{ env.RELEASE_COMMIT }}
         run: |
           script/version_bump "${MAS_VERSION}" "${RELEASE_COMMIT}"
 
       - name: 💾 Commit changes
+        env:
+          MAS_VERSION: ${{ env.MAS_VERSION }}
         run: |
           git add \
             "Homebrew/mas.rb" \
@@ -69,6 +81,8 @@ jobs:
       - name: ⤴️ Open PR
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MAS_VERSION: ${{ env.MAS_VERSION }}
+          RELEASE_BRANCH: ${{ env.RELEASE_BRANCH }}
         run: |
           gh pr create \
             --base main \
@@ -100,6 +114,9 @@ jobs:
           script/package
 
       - name: 🚀 Upload mas.pkg
+        env:
+          DRY_RUN: ${{ env.DRY_RUN }}
+          MAS_VERSION: ${{ env.MAS_VERSION }}
         if: ${{ env.DRY_RUN == 'false' }}
         run: |
           gh release upload ${MAS_VERSION} \
@@ -119,11 +136,17 @@ jobs:
           script/bootstrap -f
 
       - name: 🚰 Update mas tap formula
+        env:
+          DRY_RUN: ${{ env.DRY_RUN }}
+          MAS_VERSION: ${{ env.MAS_VERSION }}
         run: |
-          DRY_RUN=${{ env.DRY_RUN }} \
-            script/brew_tap_update ${{ env.MAS_VERSION }}
+          DRY_RUN=${DRY_RUN} \
+            script/brew_tap_update ${MAS_VERSION}
 
       - name: 🚀 Upload Bottles
+        env:
+          DRY_RUN: ${{ env.DRY_RUN }}
+          MAS_VERSION: ${{ env.MAS_VERSION }}
         if: ${{ env.DRY_RUN == 'false' }}
         run: |
           gh release upload ${MAS_VERSION} \
@@ -143,7 +166,10 @@ jobs:
           script/bootstrap -f
 
       - name: 🍺 Update Homebrew mas formula
+        env:
+          DRY_RUN: ${{ env.DRY_RUN }}
+          MAS_VERSION: ${{ env.MAS_VERSION }}
         run: |
-          DRY_RUN=${{ env.DRY_RUN }} \
-            script/brew_core_update ${{ env.MAS_VERSION }}
+          DRY_RUN=${DRY_RUN} \
+            script/brew_core_update ${MAS_VERSION}
 
