@@ -14,10 +14,10 @@ jobs:
   start:
     runs-on: macos-14
     outputs:
-      dry_run: ${{ steps.dry_run.outputs.test }}
-      mas_version: ${{ steps.mas_version.outputs.test }}
-      release_branch: ${{ steps.release_branch.outputs.test }}
-      release_commit: ${{ steps.release_commit.outputs.test }}
+      dry_run: ${{ steps.dry_run.outputs.dry_run }}
+      mas_version: ${{ steps.mas_version.outputs.mas_version }}
+      release_branch: ${{ steps.release_branch.outputs.release_branch }}
+      release_commit: ${{ steps.release_commit.outputs.release_commit }}
     steps:
       # Logs event details and sets `DRY_RUN` env var
       # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-environment-variable
