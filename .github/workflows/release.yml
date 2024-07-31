@@ -61,8 +61,8 @@ jobs:
         env:
           RELEASE_BRANCH: ${{ needs.start.outputs.release_branch }}
         run: |
-          git branch "${RELEASE_BRANCH }"
-          git switch "${RELEASE_BRANCH }"
+          git branch "$RELEASE_BRANCH"
+          git switch "$RELEASE_BRANCH"
 
       - name: 🔖 Update version
         env:
