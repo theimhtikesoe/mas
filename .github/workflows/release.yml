@@ -80,8 +80,7 @@ jobs:
             "Sources/MasKit/Package.swift"
           git commit \
             --message="🔖 Version ${MAS_VERSION}"
-          git push \
-            --set-upstream origin "${RELEASE_BRANCH}"
+          git push
 
       - name: ⤴️ Open release PR
         env:
@@ -163,8 +162,8 @@ jobs:
 
           git add Formula/mas.rb
           git commit --message="🔖 Version ${MAS_VERSION}"
+          git push
 
-          git push --set-upstream origin "${RELEASE_BRANCH}"
           gh pr create \
             --assignee phatblat \
             --base main \
